@@ -6,5 +6,14 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [
     tailwindcss(),
-    react()],
+    react()
+  ],
+  server: {
+    proxy: {
+      // Proxy API requests to Laravel backend
+      '/janji-temu': 'http://localhost:8000',
+      '/peminjaman': 'http://localhost:8000',
+    },
+  },
 })
+
