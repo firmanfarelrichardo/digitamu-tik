@@ -14,6 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
+        
+        // Exclude CSRF verification for API-like routes from separate frontend
+        $middleware->validateCsrfTokens(except: [
+            'janji-temu',
+            'peminjaman',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
