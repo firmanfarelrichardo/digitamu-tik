@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import GuestLayout from '../Layouts/GuestLayout';
@@ -9,14 +9,37 @@ import TextArea from '../Components/TextArea';
 import PrimaryButton from '../Components/PrimaryButton';
 import InputError from '../Components/InputError';
 
+// Floating Toast Component
+function FloatingToast({ message, onClose }) {
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            onClose();
+        }, 5000);
+
+        return () => clearTimeout(timer);
+    }, [onClose]);
+
+    return (
+        <div className="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 animate-slide-down">
+            <div className="bg-linear-to-r from-emerald-500 to-emerald-600 text-white px-8 py-4 rounded-full shadow-2xl flex items-center gap-3">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="font-bold text-base">{message}</span>
+            </div>
+        </div>
+    );
+}
+
 export default function JanjiTemu({ staffOptions }) {
     const navigate = useNavigate();
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState({});
+    const [showToast, setShowToast] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
     const [data, setData] = useState({
         nama: '',
         email: '',
-        no_telp: '',
         bertemu_siapa: '',
         waktu_janji_temu: '',
         topik_diskusi: '',
@@ -26,16 +49,33 @@ export default function JanjiTemu({ staffOptions }) {
         e.preventDefault();
         setProcessing(true);
         setErrors({});
+        setSuccessMessage('');
 
         try {
-            await axios.post('http://localhost:8000/janji-temu', data);
-            alert('Janji temu berhasil dibuat! Silakan tunggu konfirmasi dari staff.');
-            navigate('/');
+            const response = await axios.post('http://localhost:8000/janji-temu', data);
+            const message = response.data.message || 'Permohonan Berhasil! Bukti formulir telah dikirim ke email Anda.';
+            
+            setSuccessMessage(message);
+            setShowToast(true);
+            
+            // Reset form
+            setData({
+                nama: '',
+                email: '',
+                bertemu_siapa: '',
+                waktu_janji_temu: '',
+                topik_diskusi: '',
+            });
+            
+            // Navigate to home after 5 seconds
+            setTimeout(() => {
+                navigate('/');
+            }, 5000);
         } catch (error) {
             if (error.response?.data?.errors) {
                 setErrors(error.response.data.errors);
             } else {
-                setErrors({ error: ['Terjadi kesalahan. Silakan coba lagi.'] });
+                setErrors({ general: [error.response?.data?.message || 'Terjadi kesalahan. Silakan coba lagi.'] });
             }
         } finally {
             setProcessing(false);
@@ -48,103 +88,145 @@ export default function JanjiTemu({ staffOptions }) {
 
     return (
         <GuestLayout>
-            <div className="max-w-2xl mx-auto">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                        Jadwalkan Janji Temu
+            {/* Floating Toast Notification */}
+            {showToast && successMessage && (
+                <FloatingToast 
+                    message={successMessage} 
+                    onClose={() => setShowToast(false)} 
+                />
+            )}
+
+            <div className="max-w-4xl mx-auto">
+                {/* Professional Header */}
+                <div className="text-center mb-10">
+                    <h1 className="text-4xl font-bold text-slate-800 mb-3 tracking-tight">
+                        Jadwalkan Kunjungan
                     </h1>
-                    <p className="text-gray-600">
-                        Silakan lengkapi formulir untuk membuat janji dengan staff atau administrasi UPA TIK tanpa harus datang mengantri.
+                    <p className="text-lg text-slate-500 max-w-2xl mx-auto">
+                        Kami siap melayani kebutuhan konsultasi dan teknis Anda
                     </p>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-lg p-8">
-                    <form onSubmit={submit} className="space-y-6">
-                        <div>
-                            <InputLabel htmlFor="nama" value="Nama Lengkap" />
-                            <TextInput
-                                id="nama"
-                                type="text"
-                                placeholder="Masukkan nama Anda"
-                                value={data.nama}
-                                onChange={(e) => handleChange('nama', e.target.value)}
-                                required
-                                isFocused
-                            />
-                            <InputError message={errors.nama?.[0]} />
+                {/* Modern Form Card */}
+                <div className="bg-white border border-gray-100 rounded-2xl shadow-xl shadow-gray-200/50 p-10">
+                    <form onSubmit={submit} className="space-y-8">
+                        {/* Group 1: Personal Information */}
+                        <div className="space-y-6">
+                            <div className="border-l-4 border-sky-500 pl-4">
+                                <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">
+                                    Informasi Personal
+                                </h2>
+                            </div>
+                            
+                            {/* Name - Full Width */}
+                            <div>
+                                <InputLabel htmlFor="nama" value="Nama Lengkap" />
+                                <TextInput
+                                    id="nama"
+                                    type="text"
+                                    className="mt-2 block w-full bg-gray-50 focus:bg-white transition-colors px-4 py-3 text-base"
+                                    placeholder="Masukkan nama lengkap Anda"
+                                    value={data.nama}
+                                    onChange={(e) => handleChange('nama', e.target.value)}
+                                    required
+                                    isFocused
+                                />
+                                <InputError message={errors.nama?.[0]} className="mt-2" />
+                            </div>
+
+                            {/* Email - Full Width */}
+                            <div>
+                                <InputLabel htmlFor="email" value="Alamat Email" />
+                                <TextInput
+                                    id="email"
+                                    type="email"
+                                    className="mt-2 block w-full bg-gray-50 focus:bg-white transition-colors px-4 py-3 text-base"
+                                    placeholder="nama@example.com"
+                                    value={data.email}
+                                    onChange={(e) => handleChange('email', e.target.value)}
+                                    required
+                                />
+                                <InputError message={errors.email?.[0]} className="mt-2" />
+                            </div>
                         </div>
 
-                        <div>
-                            <InputLabel htmlFor="email" value="Email" />
-                            <TextInput
-                                id="email"
-                                type="email"
-                                placeholder="user@example.com"
-                                value={data.email}
-                                onChange={(e) => handleChange('email', e.target.value)}
-                                required
-                            />
-                            <InputError message={errors.email?.[0]} />
+                        {/* Group 2: Appointment Details */}
+                        <div className="space-y-6 pt-4">
+                            <div className="border-l-4 border-sky-500 pl-4">
+                                <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">
+                                    Detail Kunjungan
+                                </h2>
+                            </div>
+                            
+                            {/* Grid: Bertemu Siapa + Waktu */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {/* Bertemu Siapa */}
+                                <div>
+                                    <InputLabel htmlFor="bertemu_siapa" value="Tujuan Bertemu" />
+                                    <SelectInput
+                                        id="bertemu_siapa"
+                                        className="mt-2 block w-full bg-gray-50 focus:bg-white transition-colors px-4 py-3 text-base"
+                                        value={data.bertemu_siapa}
+                                        onChange={(e) => handleChange('bertemu_siapa', e.target.value)}
+                                        required
+                                    >
+                                        <option value="">-- Pilih Tujuan --</option>
+                                        {staffOptions && staffOptions.map((staff, index) => (
+                                            <option key={index} value={staff}>
+                                                {staff}
+                                            </option>
+                                        ))}
+                                    </SelectInput>
+                                    <InputError message={errors.bertemu_siapa?.[0]} className="mt-2" />
+                                </div>
+
+                                {/* Waktu */}
+                                <div>
+                                    <InputLabel htmlFor="waktu_janji_temu" value="Tanggal & Waktu" />
+                                    <TextInput
+                                        id="waktu_janji_temu"
+                                        type="datetime-local"
+                                        className="mt-2 block w-full bg-gray-50 focus:bg-white transition-colors px-4 py-3 text-base"
+                                        value={data.waktu_janji_temu}
+                                        onChange={(e) => handleChange('waktu_janji_temu', e.target.value)}
+                                        required
+                                    />
+                                    <InputError message={errors.waktu_janji_temu?.[0]} className="mt-2" />
+                                </div>
+                            </div>
                         </div>
 
-                        <div>
-                            <InputLabel htmlFor="no_telp" value="Nomor Telepon (Opsional)" />
-                            <TextInput
-                                id="no_telp"
-                                type="tel"
-                                placeholder="08123456789"
-                                value={data.no_telp}
-                                onChange={(e) => handleChange('no_telp', e.target.value)}
-                            />
-                            <InputError message={errors.no_telp?.[0]} />
+                        {/* Group 3: Context */}
+                        <div className="space-y-6 pt-4">
+                            <div className="border-l-4 border-sky-500 pl-4">
+                                <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">
+                                    Topik Pembahasan
+                                </h2>
+                            </div>
+                            
+                            {/* Topik Diskusi - Full Width */}
+                            <div>
+                                <InputLabel htmlFor="topik_diskusi" value="Deskripsi Keperluan" />
+                                <TextArea
+                                    id="topik_diskusi"
+                                    className="mt-2 block w-full bg-gray-50 focus:bg-white transition-colors px-4 py-3 text-base resize-none"
+                                    placeholder="Jelaskan secara detail topik yang ingin Anda diskusikan..."
+                                    value={data.topik_diskusi}
+                                    onChange={(e) => handleChange('topik_diskusi', e.target.value)}
+                                    rows={5}
+                                    required
+                                />
+                                <InputError message={errors.topik_diskusi?.[0]} className="mt-2" />
+                            </div>
                         </div>
 
-                        <div>
-                            <InputLabel htmlFor="bertemu_siapa" value="Ingin Bertemu Siapa?" />
-                            <SelectInput
-                                id="bertemu_siapa"
-                                value={data.bertemu_siapa}
-                                onChange={(e) => handleChange('bertemu_siapa', e.target.value)}
-                                required
+                        {/* Submit Button */}
+                        <div className="pt-6">
+                            <PrimaryButton 
+                                className="w-full py-4 text-base font-bold tracking-wide transform hover:scale-[1.02] transition-transform" 
+                                disabled={processing}
                             >
-                                <option value="">-- Pilih Layanan --</option>
-                                {staffOptions.map((staff, index) => (
-                                    <option key={index} value={staff}>
-                                        {staff}
-                                    </option>
-                                ))}
-                            </SelectInput>
-                            <InputError message={errors.bertemu_siapa?.[0]} />
-                        </div>
-
-                        <div>
-                            <InputLabel htmlFor="waktu_janji_temu" value="Rencana Tanggal & Waktu" />
-                            <TextInput
-                                id="waktu_janji_temu"
-                                type="datetime-local"
-                                value={data.waktu_janji_temu}
-                                onChange={(e) => handleChange('waktu_janji_temu', e.target.value)}
-                                required
-                            />
-                            <InputError message={errors.waktu_janji_temu?.[0]} />
-                        </div>
-
-                        <div>
-                            <InputLabel htmlFor="topik_diskusi" value="Topik Diskusi" />
-                            <TextArea
-                                id="topik_diskusi"
-                                placeholder="Jelaskan secara singkat topik yang ingin dibahas..."
-                                value={data.topik_diskusi}
-                                onChange={(e) => handleChange('topik_diskusi', e.target.value)}
-                                rows={4}
-                                required
-                            />
-                            <InputError message={errors.topik_diskusi?.[0]} />
-                        </div>
-
-                        <div className="pt-4">
-                            <PrimaryButton disabled={processing}>
-                                {processing ? 'Mengirim...' : 'Buat Janji Temu'}
+                                {processing ? 'Mengirim Formulir...' : 'Kirim Permohonan Kunjungan'}
                             </PrimaryButton>
                         </div>
                     </form>
