@@ -25,11 +25,12 @@ class StorePeminjamanRequest extends FormRequest
             'nama' => ['required', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:100'],
             'instansi' => ['required', 'string', 'max:150'],
-            'fasilitas' => ['required', 'string', 'max:200'],
+            'no_telp' => ['nullable', 'string', 'max:20'],
+            'barang' => ['required', 'string', 'max:200'],
             'detail_kebutuhan' => ['nullable', 'string'],
-            'tanggal_mulai' => ['required', 'date', 'after:now'],
+            'tanggal_mulai' => ['required', 'date', 'after_or_equal:today'],
             'tanggal_selesai' => ['required', 'date', 'after:tanggal_mulai'],
-            'surat_pengantar' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:2048'],
+            'surat_pengantar' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
         ];
     }
 
@@ -44,7 +45,8 @@ class StorePeminjamanRequest extends FormRequest
             'nama' => 'nama peminjam',
             'email' => 'email',
             'instansi' => 'asal instansi/UKM',
-            'fasilitas' => 'fasilitas yang dipinjam',
+            'no_telp' => 'nomor telepon',
+            'barang' => 'barang/fasilitas yang dipinjam',
             'detail_kebutuhan' => 'detail kebutuhan',
             'tanggal_mulai' => 'tanggal mulai',
             'tanggal_selesai' => 'tanggal selesai',
@@ -60,10 +62,10 @@ class StorePeminjamanRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'tanggal_mulai.after' => 'Tanggal mulai harus di masa depan.',
+            'tanggal_mulai.after_or_equal' => 'Tanggal mulai tidak boleh di masa lalu.',
             'tanggal_selesai.after' => 'Tanggal selesai harus setelah tanggal mulai.',
             'surat_pengantar.mimes' => 'Surat pengantar harus berformat PDF, JPG, JPEG, atau PNG.',
-            'surat_pengantar.max' => 'Ukuran surat pengantar maksimal 2MB.',
+            'surat_pengantar.max' => 'Ukuran surat pengantar maksimal 5MB.',
         ];
     }
 }
