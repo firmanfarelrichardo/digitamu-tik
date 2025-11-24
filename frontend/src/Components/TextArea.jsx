@@ -9,7 +9,7 @@ export default forwardRef(function TextArea(
             {...props}
             rows={rows}
             className={
-                'w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent transition resize-none ' +
+                'border-gray-300 focus:border-sky-500 focus:ring-sky-500 rounded-md shadow-sm ' +
                 className
             }
             ref={ref}
