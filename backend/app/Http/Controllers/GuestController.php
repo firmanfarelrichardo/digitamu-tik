@@ -169,13 +169,22 @@ class GuestController extends Controller
             if ($request->hasFile('surat_pengantar')) {
                 $file = $request->file('surat_pengantar');
                 
-                // Store file with original name preserved
-                $path = $file->store('uploads/surat_pengantar', 'public');
+                // Generate filename format: tanggalwaktu_barang_idpenomoran_suratpermohonan.ext
+                $tanggalWaktu = date('Ymd_His'); // Format: 20251124_103045
+                $barangSanitized = preg_replace('/[^a-zA-Z0-9]/', '_', $request->barang); // Sanitize facility name
+                $idPenomoran = strtoupper(substr($peminjaman->id, 0, 8)); // First 8 chars of UUID
+                $extension = $file->getClientOriginalExtension();
+                
+                // Final format: 20251124_103045_Ruang_Meeting_A1B2C3D4_suratpermohonan.pdf
+                $filename = "{$tanggalWaktu}_{$barangSanitized}_{$idPenomoran}_suratpermohonan.{$extension}";
+                
+                // Store file with structured filename
+                $path = $file->storeAs('uploads/surat_pengantar', $filename, 'public');
                 
                 // Create berkas record
                 Berkas::create([
                     'id_peminjaman' => $peminjaman->id,
-                    'nama_file' => $file->getClientOriginalName(),
+                    'nama_file' => $filename,
                     'path_file' => $path,
                 ]);
             }

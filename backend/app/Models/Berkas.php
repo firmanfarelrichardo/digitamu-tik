@@ -13,15 +13,20 @@ class Berkas extends Model
 
     protected $table = 'berkas';
     
-    public $timestamps = false;
-    
+    /**
+     * The name of the "created at" column.
+     */
     const CREATED_AT = 'create_at';
+    
+    /**
+     * The name of the "updated at" column.
+     */
+    const UPDATED_AT = null;
 
-    protected $fillable = [
-        'id_peminjaman',
-        'nama_file',
-        'path_file',
-    ];
+    /**
+     * The attributes that aren't mass assignable.
+     */
+    protected $guarded = ['id'];
 
     /**
      * Get the peminjaman that owns the berkas.
