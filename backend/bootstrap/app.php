@@ -17,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
         
         // Exclude CSRF verification for API-like routes from separate frontend
         $middleware->validateCsrfTokens(except: [
+            'auth/*',
+            'admin/*',
             'janji-temu',
             'peminjaman',
         ]);

@@ -3,6 +3,9 @@ import Welcome from './Pages/Welcome';
 import JanjiTemu from './Pages/JanjiTemu';
 import Peminjaman from './Pages/Peminjaman';
 
+// Auth Pages
+import Login from './Pages/Auth/Login';
+
 // Admin Pages
 import Dashboard from './Pages/Admin/Dashboard';
 import ManajemenStaff from './Pages/Admin/ManajemenStaff';
@@ -39,6 +42,9 @@ function App() {
           'Sound System',
           'LED Screen',
         ]} />} />
+
+        {/* Auth Routes */}
+        <Route path="/login" element={<Login />} />
 
         {/* Admin Routes */}
         <Route path="/admin" element={<Dashboard />} />
