@@ -8,6 +8,11 @@ import Dashboard from './Pages/Admin/Dashboard';
 import ManajemenStaff from './Pages/Admin/ManajemenStaff';
 import LaporanData from './Pages/Admin/LaporanData';
 
+// Staff Pages
+import StaffDashboard from './Pages/Staff/Dashboard';
+import VerifikasiPermohonan from './Pages/Staff/VerifikasiPermohonan';
+import RiwayatTamu from './Pages/Staff/RiwayatTamu';
+
 import './App.css';
 
 function App() {
@@ -39,6 +44,11 @@ function App() {
         <Route path="/admin" element={<Dashboard />} />
         <Route path="/admin/manajemen-staff" element={<ManajemenStaff />} />
         <Route path="/admin/laporan" element={<LaporanData />} />
+
+        {/* Staff Routes */}
+        <Route path="/staff" element={<StaffDashboard />} />
+        <Route path="/staff/verifikasi" element={<VerifikasiPermohonan />} />
+        <Route path="/staff/riwayat" element={<RiwayatTamu />} />
       </Routes>
     </BrowserRouter>
   );
