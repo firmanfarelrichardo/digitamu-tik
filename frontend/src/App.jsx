@@ -15,6 +15,7 @@ import LaporanData from './Pages/Admin/LaporanData';
 import StaffDashboard from './Pages/Staff/Dashboard';
 import VerifikasiPermohonan from './Pages/Staff/VerifikasiPermohonan';
 import RiwayatTamu from './Pages/Staff/RiwayatTamu';
+import RiwayatPeminjaman from './Pages/Staff/RiwayatPeminjaman';
 
 import './App.css';
 
@@ -55,6 +56,7 @@ function App() {
         <Route path="/staff" element={<StaffDashboard />} />
         <Route path="/staff/verifikasi" element={<VerifikasiPermohonan />} />
         <Route path="/staff/riwayat" element={<RiwayatTamu />} />
+        <Route path="/staff/riwayat-peminjaman" element={<RiwayatPeminjaman />} />
       </Routes>
     </BrowserRouter>
   );
