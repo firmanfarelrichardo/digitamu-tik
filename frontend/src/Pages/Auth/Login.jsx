@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../lib/axios';
 import logoUpatik from '../../assets/logo_upatik.png';
 import backgroundImg from '../../assets/background.png';
 
@@ -28,13 +28,15 @@ export default function Login() {
         setError('');
 
         try {
-            const response = await axios.post('http://localhost:8000/auth/login', {
+            const response = await api.post('/auth/login', {
                 akun_sso: data.akun_sso,
                 password: data.password,
                 remember: data.remember,
-            }, {
-                withCredentials: true,
             });
+
+            // Store auth state
+            localStorage.setItem('isAuthenticated', 'true');
+            localStorage.setItem('user', JSON.stringify(response.data.user));
 
             // Redirect berdasarkan role dari response backend
             if (response.data.redirect) {
