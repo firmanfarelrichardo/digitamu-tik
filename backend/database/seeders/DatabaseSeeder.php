@@ -169,5 +169,7 @@ class DatabaseSeeder extends Seeder
             'detail_kebutuhan' => 'Untuk demo sistem baru',
             'status' => 'diajukan',
         ]);
+        // Seed kunjungan data
+        $this->call(KunjunganSeeder::class);
     }
 }

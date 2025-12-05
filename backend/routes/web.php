@@ -23,6 +23,33 @@ Route::prefix('auth')->name('auth.')->group(function () {
     Route::get('/user', [AuthController::class, 'user'])->name('user')->middleware('auth');
 });
 
+// Staff Routes (API untuk Staff Panel)
+Route::prefix('staff')->name('staff.')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [StaffController::class, 'dashboard'])->name('dashboard');
+    
+    // Verifikasi Permohonan
+    Route::get('/permohonan', [StaffController::class, 'getPermohonan'])->name('permohonan.index');
+    Route::post('/permohonan/approve', [StaffController::class, 'approvePermohonan'])->name('permohonan.approve');
+    Route::post('/permohonan/reject', [StaffController::class, 'rejectPermohonan'])->name('permohonan.reject');
+    
+    // Kunjungan Actions
+    Route::post('/kunjungan/{id}/checkin', [StaffController::class, 'checkinKunjungan'])->name('kunjungan.checkin');
+    Route::post('/kunjungan/{id}/checkout', [StaffController::class, 'checkoutKunjungan'])->name('kunjungan.checkout');
+    Route::get('/kunjungan/{id}', [StaffController::class, 'getDetailKunjungan'])->name('kunjungan.detail');
+    
+    // Riwayat Tamu
+    Route::get('/riwayat', [StaffController::class, 'getRiwayat'])->name('riwayat.index');
+    
+    // Riwayat Peminjaman
+    Route::get('/riwayat-peminjaman', [StaffController::class, 'getRiwayatPeminjaman'])->name('riwayat-peminjaman.index');
+    Route::post('/peminjaman/{id}/pinjam', [StaffController::class, 'pinjamBarang'])->name('peminjaman.pinjam');
+    Route::post('/peminjaman/{id}/selesai', [StaffController::class, 'selesaiPeminjaman'])->name('peminjaman.selesai');
+    
+    // Export
+    Route::get('/export/excel', [StaffController::class, 'exportExcel'])->name('export.excel');
+});
+
 // Admin Routes (Protected)
 Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     // Dashboard

@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ClipboardCheck, History, LogOut } from 'lucide-react';
+import { LayoutDashboard, ClipboardCheck, History, FileText, LogOut } from 'lucide-react';
 
 export default function StaffLayout({ children }) {
     const location = useLocation();
@@ -19,6 +19,11 @@ export default function StaffLayout({ children }) {
             name: 'Riwayat Tamu',
             path: '/staff/riwayat',
             icon: History,
+        },
+        {
+            name: 'Riwayat Peminjaman',
+            path: '/staff/riwayat-peminjaman',
+            icon: FileText,
         },
     ];
 
