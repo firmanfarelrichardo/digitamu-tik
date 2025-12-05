@@ -44,5 +44,8 @@ class DatabaseSeeder extends Seeder
             'role' => 'staff',
             'is_active' => true,
         ]);
+
+        // Seed kunjungan data
+        $this->call(KunjunganSeeder::class);
     }
 }
