@@ -1,16 +1,44 @@
+import { useState, useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, ClipboardCheck, History, FileText, LogOut } from 'lucide-react';
-import axios from 'axios';
+import { LayoutDashboard, ClipboardCheck, History, LogOut, FileText } from 'lucide-react';
+import api from '../lib/axios';
 
 export default function StaffLayout({ children }) {
     const location = useLocation();
     const navigate = useNavigate();
+    const [user, setUser] = useState(null);
+
+    useEffect(() => {
+        fetchUser();
+    }, []);
+
+    const fetchUser = async () => {
+        try {
+            const response = await api.get('/auth/user');
+            setUser(response.data.user);
+        } catch (error) {
+            console.error('Error fetching user:', error);
+        }
+    };
+
+    // Generate initials from name
+    const getInitials = (name) => {
+        if (!name) return 'U';
+        const words = name.split(' ');
+        if (words.length >= 2) {
+            return (words[0][0] + words[1][0]).toUpperCase();
+        }
+        return name.substring(0, 2).toUpperCase();
+    };
+
+    // Get role display text
+    const getRoleDisplay = (role) => {
+        return role === 'admin' ? 'Administrator' : 'Staff TIK';
+    };
 
     const handleLogout = async () => {
         try {
-            await axios.post('http://localhost:8000/auth/logout', {}, {
-                withCredentials: true
-            });
+            await api.post('/auth/logout');
             navigate('/login');
         } catch (error) {
             console.error('Logout error:', error);
@@ -100,11 +128,11 @@ export default function StaffLayout({ children }) {
                     {/* User Info */}
                     <div className="flex items-center gap-3">
                         <div className="text-right">
-                            <p className="text-sm font-semibold text-slate-800">Petugas Front Office</p>
-                            <p className="text-xs text-slate-500">Staff TIK</p>
+                            <p className="text-sm font-semibold text-slate-800">{user?.name || 'Loading...'}</p>
+                            <p className="text-xs text-slate-500">{getRoleDisplay(user?.role)}</p>
                         </div>
                         <div className="w-9 h-9 bg-slate-200 rounded-full flex items-center justify-center">
-                            <span className="text-slate-600 font-semibold text-xs">PF</span>
+                            <span className="text-slate-600 font-semibold text-xs">{getInitials(user?.name)}</span>
                         </div>
                     </div>
                 </header>

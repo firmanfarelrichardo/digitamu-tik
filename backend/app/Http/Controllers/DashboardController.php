@@ -123,9 +123,14 @@ class DashboardController extends Controller
             $query->where('status', $status);
         }
 
-        // Filter by date range
+        // Filter by date range (using create_at)
         if ($startDate && $endDate) {
-            $query->whereBetween('create_at', [$startDate, $endDate]);
+            $query->whereDate('create_at', '>=', $startDate)
+                  ->whereDate('create_at', '<=', $endDate);
+        } elseif ($startDate) {
+            $query->whereDate('create_at', '>=', $startDate);
+        } elseif ($endDate) {
+            $query->whereDate('create_at', '<=', $endDate);
         }
 
         // Search by name or keperluan

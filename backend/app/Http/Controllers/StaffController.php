@@ -729,39 +729,71 @@ class StaffController extends Controller
     }
 
     /**
-     * Export data to Excel (returns data for frontend to process).
+     * Export data to Excel/PDF (returns data for frontend to process).
      */
     public function exportExcel(Request $request): JsonResponse
     {
-        $today = Carbon::today();
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $kategori = $request->input('kategori', 'Semua Data');
 
-        $data = Kunjungan::with('tamu')
-            ->whereDate('waktu_janji_temu', $today)
-            ->orWhereDate('waktu_checkin', $today)
-            ->orderBy('waktu_checkin', 'desc')
+        $query = Kunjungan::with(['tamu', 'peminjaman']);
+
+        // Filter by date range
+        if ($startDate && $endDate) {
+            $query->where(function($q) use ($startDate, $endDate) {
+                $q->whereBetween('waktu_janji_temu', [$startDate, $endDate . ' 23:59:59'])
+                  ->orWhereBetween('waktu_checkin', [$startDate, $endDate . ' 23:59:59']);
+            });
+        }
+
+        // Filter by kategori
+        if ($kategori === 'Janji Temu') {
+            $query->whereDoesntHave('peminjaman');
+        } elseif ($kategori === 'Peminjaman') {
+            $query->whereHas('peminjaman');
+        }
+
+        $data = $query->orderBy('create_at', 'desc')
             ->get()
             ->map(function ($kunjungan) {
+                $isPeminjaman = $kunjungan->peminjaman !== null;
+                
                 return [
+                    'tanggal' => Carbon::parse($kunjungan->create_at)->format('d/m/Y'),
                     'waktu' => $kunjungan->waktu_checkin 
                         ? Carbon::parse($kunjungan->waktu_checkin)->format('H:i')
                         : Carbon::parse($kunjungan->waktu_janji_temu)->format('H:i'),
                     'nama' => $kunjungan->tamu->nama ?? '-',
+                    'email' => $kunjungan->tamu->email ?? '-',
+                    'no_telp' => $kunjungan->tamu->no_telp ?? '-',
                     'instansi' => $kunjungan->tamu->instansi ?? '-',
-                    'keperluan' => $this->extractKeperluan($kunjungan->keperluan),
-                    'status' => $kunjungan->status,
+                    'jenis' => $isPeminjaman ? 'Peminjaman' : 'Janji Temu',
+                    'keperluan' => $isPeminjaman 
+                        ? ($kunjungan->peminjaman->judul_permohonan ?? '-')
+                        : $this->extractKeperluan($kunjungan->keperluan),
+                    'status' => ucfirst($kunjungan->status),
                     'waktu_checkin' => $kunjungan->waktu_checkin 
-                        ? Carbon::parse($kunjungan->waktu_checkin)->format('Y-m-d H:i:s')
+                        ? Carbon::parse($kunjungan->waktu_checkin)->format('d/m/Y H:i')
                         : '-',
                     'waktu_checkout' => $kunjungan->waktu_checkout 
-                        ? Carbon::parse($kunjungan->waktu_checkout)->format('Y-m-d H:i:s')
+                        ? Carbon::parse($kunjungan->waktu_checkout)->format('d/m/Y H:i')
                         : '-',
                 ];
             });
 
+        $filename = 'laporan_kunjungan';
+        if ($startDate && $endDate) {
+            $filename .= '_' . $startDate . '_sd_' . $endDate;
+        } else {
+            $filename .= '_' . Carbon::today()->format('Y-m-d');
+        }
+
         return response()->json([
             'success' => true,
             'data' => $data,
-            'filename' => 'aktivitas_tamu_' . $today->format('Y-m-d') . '.xlsx',
+            'filename' => $filename,
+            'total' => $data->count(),
         ]);
     }
 
