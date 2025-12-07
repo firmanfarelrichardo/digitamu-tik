@@ -20,6 +20,11 @@ export default function Dashboard() {
     const [showModal, setShowModal] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
 
+    // State untuk modal konfirmasi checkin/checkout
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [confirmAction, setConfirmAction] = useState(null); // 'checkin' atau 'checkout'
+    const [confirmItem, setConfirmItem] = useState(null);
+
     // Fetch dashboard data
     const fetchDashboard = async () => {
         try {
@@ -52,8 +57,45 @@ export default function Dashboard() {
         return 'Selamat Malam';
     };
 
-    // Handle checkin
-    const handleCheckin = async (id) => {
+    // Handle checkin - tampilkan konfirmasi dulu
+    const confirmCheckin = (item) => {
+        setConfirmItem(item);
+        setConfirmAction('checkin');
+        setShowConfirmModal(true);
+    };
+
+    // Handle checkout - tampilkan konfirmasi dulu
+    const confirmCheckout = (item) => {
+        setConfirmItem(item);
+        setConfirmAction('checkout');
+        setShowConfirmModal(true);
+    };
+
+    // Handle konfirmasi aksi
+    const handleConfirmAction = async () => {
+        if (!confirmItem || !confirmAction) return;
+        
+        setShowConfirmModal(false);
+        
+        if (confirmAction === 'checkin') {
+            await executeCheckin(confirmItem.id);
+        } else if (confirmAction === 'checkout') {
+            await executeCheckout(confirmItem.id);
+        }
+        
+        setConfirmItem(null);
+        setConfirmAction(null);
+    };
+
+    // Handle batal konfirmasi
+    const handleCancelConfirm = () => {
+        setShowConfirmModal(false);
+        setConfirmItem(null);
+        setConfirmAction(null);
+    };
+
+    // Execute checkin
+    const executeCheckin = async (id) => {
         if (actionLoading) return;
         
         setActionLoading(id);
@@ -71,8 +113,8 @@ export default function Dashboard() {
         }
     };
 
-    // Handle checkout
-    const handleCheckout = async (id) => {
+    // Execute checkout
+    const executeCheckout = async (id) => {
         if (actionLoading) return;
         
         setActionLoading(id);
@@ -212,7 +254,7 @@ export default function Dashboard() {
                                             <div className="flex items-center gap-2">
                                                 {item.status === 'Menunggu' ? (
                                                     <button
-                                                        onClick={() => handleCheckin(item.id)}
+                                                        onClick={() => confirmCheckin(item)}
                                                         disabled={actionLoading === item.id}
                                                         className="bg-[#22c55e] hover:bg-[#16a34a] text-white px-3 py-1.5 rounded text-xs font-medium transition-colors disabled:opacity-50"
                                                     >
@@ -220,7 +262,7 @@ export default function Dashboard() {
                                                     </button>
                                                 ) : item.status === 'Di Dalam' ? (
                                                     <button
-                                                        onClick={() => handleCheckout(item.id)}
+                                                        onClick={() => confirmCheckout(item)}
                                                         disabled={actionLoading === item.id}
                                                         className="bg-[#ef4444] hover:bg-[#dc2626] text-white px-3 py-1.5 rounded text-xs font-medium transition-colors disabled:opacity-50"
                                                     >
@@ -343,6 +385,70 @@ export default function Dashboard() {
                                 className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-md text-sm font-medium transition-colors"
                             >
                                 Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {/* Modal Konfirmasi Check-in/Check-out */}
+            {showConfirmModal && confirmItem && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                            <h2 className="text-lg font-semibold text-slate-800">
+                                {confirmAction === 'checkin' ? 'Konfirmasi Check-In' : 'Konfirmasi Check-Out'}
+                            </h2>
+                            <button
+                                onClick={handleCancelConfirm}
+                                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                            >
+                                <X size={20} className="text-slate-500" />
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="px-6 py-5">
+                            <p className="text-sm text-slate-600 mb-4">
+                                {confirmAction === 'checkin' 
+                                    ? 'Apakah Anda yakin ingin melakukan check-in untuk tamu berikut?'
+                                    : 'Apakah Anda yakin ingin melakukan check-out untuk tamu berikut?'
+                                }
+                            </p>
+                            
+                            <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                                <div className="flex justify-between">
+                                    <span className="text-xs font-medium text-slate-500">Nama:</span>
+                                    <span className="text-sm font-medium text-slate-800">{confirmItem.nama}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-xs font-medium text-slate-500">Instansi:</span>
+                                    <span className="text-sm text-slate-700">{confirmItem.instansi}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-xs font-medium text-slate-500">Keperluan:</span>
+                                    <span className="text-sm text-slate-700 text-right max-w-[200px]">{confirmItem.keperluan}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
+                            <button
+                                onClick={handleCancelConfirm}
+                                className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={handleConfirmAction}
+                                className={`px-4 py-2 rounded-md text-sm font-medium text-white transition-colors ${
+                                    confirmAction === 'checkin'
+                                        ? 'bg-[#22c55e] hover:bg-[#16a34a]'
+                                        : 'bg-[#ef4444] hover:bg-[#dc2626]'
+                                }`}
+                            >
+                                {confirmAction === 'checkin' ? 'Ya, Check-In' : 'Ya, Check-Out'}
                             </button>
                         </div>
                     </div>

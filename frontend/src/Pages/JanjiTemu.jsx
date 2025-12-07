@@ -37,10 +37,12 @@ export default function JanjiTemu({ staffOptions }) {
     const [errors, setErrors] = useState({});
     const [showToast, setShowToast] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [showCustomInput, setShowCustomInput] = useState(false);
     const [data, setData] = useState({
         nama: '',
         email: '',
         bertemu_siapa: '',
+        bertemu_siapa_custom: '',
         waktu_janji_temu: '',
         topik_diskusi: '',
     });
@@ -51,8 +53,14 @@ export default function JanjiTemu({ staffOptions }) {
         setErrors({});
         setSuccessMessage('');
 
+        // Prepare data - use custom input if "Lainnya" is selected
+        const submitData = {
+            ...data,
+            bertemu_siapa: data.bertemu_siapa === 'Lainnya' ? data.bertemu_siapa_custom : data.bertemu_siapa,
+        };
+
         try {
-            const response = await axios.post('http://localhost:8000/janji-temu', data);
+            const response = await axios.post('http://localhost:8000/janji-temu', submitData);
             const message = response.data.message || 'Permohonan Berhasil! Bukti formulir telah dikirim ke email Anda.';
             
             setSuccessMessage(message);
@@ -63,9 +71,11 @@ export default function JanjiTemu({ staffOptions }) {
                 nama: '',
                 email: '',
                 bertemu_siapa: '',
+                bertemu_siapa_custom: '',
                 waktu_janji_temu: '',
                 topik_diskusi: '',
             });
+            setShowCustomInput(false);
             
             // Navigate to home after 5 seconds
             setTimeout(() => {
@@ -84,6 +94,15 @@ export default function JanjiTemu({ staffOptions }) {
 
     const handleChange = (field, value) => {
         setData(prev => ({ ...prev, [field]: value }));
+        
+        // Show/hide custom input when "Lainnya" is selected
+        if (field === 'bertemu_siapa') {
+            setShowCustomInput(value === 'Lainnya');
+            // Clear custom input if not "Lainnya"
+            if (value !== 'Lainnya') {
+                setData(prev => ({ ...prev, bertemu_siapa_custom: '' }));
+            }
+        }
     };
 
     return (
@@ -176,8 +195,27 @@ export default function JanjiTemu({ staffOptions }) {
                                                 {staff}
                                             </option>
                                         ))}
+                                        <option value="Lainnya">Lainnya</option>
                                     </SelectInput>
                                     <InputError message={errors.bertemu_siapa?.[0]} className="mt-2" />
+                                    
+                                    {/* Custom Input for "Lainnya" */}
+                                    {showCustomInput && (
+                                        <div className="mt-3">
+                                            <TextInput
+                                                id="bertemu_siapa_custom"
+                                                type="text"
+                                                className="block w-full bg-gray-50 focus:bg-white transition-colors px-4 py-3 text-base"
+                                                placeholder="Tuliskan tujuan kunjungan Anda..."
+                                                value={data.bertemu_siapa_custom}
+                                                onChange={(e) => handleChange('bertemu_siapa_custom', e.target.value)}
+                                                required
+                                            />
+                                            <p className="text-xs text-slate-500 mt-1">
+                                                Contoh: Konsultasi masalah jaringan, Pengambilan dokumen, dll.
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Waktu */}
