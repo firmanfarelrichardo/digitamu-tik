@@ -1,5 +1,5 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, ClipboardCheck, History, LogOut } from 'lucide-react';
+import { LayoutDashboard, ClipboardCheck, History, FileText, LogOut } from 'lucide-react';
 import axios from 'axios';
 
 export default function StaffLayout({ children }) {
