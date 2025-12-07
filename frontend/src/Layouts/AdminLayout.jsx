@@ -1,8 +1,22 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Users, FileText, LogOut } from 'lucide-react';
+import axios from 'axios';
 
 export default function AdminLayout({ children }) {
     const location = useLocation();
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        try {
+            await axios.post('http://localhost:8000/auth/logout', {}, {
+                withCredentials: true
+            });
+            navigate('/login');
+        } catch (error) {
+            console.error('Logout error:', error);
+            navigate('/login');
+        }
+    };
 
     const menuItems = [
         {
@@ -59,7 +73,10 @@ export default function AdminLayout({ children }) {
 
                 {/* Logout Button */}
                 <div className="px-4 py-6 border-t border-slate-700">
-                    <button className="flex items-center gap-3 px-4 py-3 text-red-400 hover:text-red-300 transition-colors w-full">
+                    <button 
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 px-4 py-3 text-red-400 hover:text-red-300 transition-colors w-full"
+                    >
                         <LogOut size={20} />
                         <span className="text-sm font-medium">Logout</span>
                     </button>
