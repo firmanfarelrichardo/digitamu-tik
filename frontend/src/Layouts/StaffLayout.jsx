@@ -34,6 +34,11 @@ export default function StaffLayout({ children }) {
             path: '/staff/riwayat',
             icon: History,
         },
+        {
+            name: 'Riwayat Peminjaman',
+            path: '/staff/riwayat-peminjaman',
+            icon: FileText,
+        },
     ];
 
     return (
