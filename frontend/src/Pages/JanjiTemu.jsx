@@ -53,6 +53,25 @@ export default function JanjiTemu({ staffOptions }) {
         setErrors({});
         setSuccessMessage('');
 
+        // Validasi jam kerja sebelum submit
+        if (data.waktu_janji_temu) {
+            const selectedDate = new Date(data.waktu_janji_temu);
+            const hours = selectedDate.getHours();
+            const dayOfWeek = selectedDate.getDay();
+            
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                setErrors({ waktu_janji_temu: ['Kunjungan hanya dapat dilakukan pada hari kerja (Senin - Jumat)'] });
+                setProcessing(false);
+                return;
+            }
+            
+            if (hours < 8 || hours >= 15) {
+                setErrors({ waktu_janji_temu: ['Jam kunjungan harus dalam jam kerja TIK (08:00 - 15:00)'] });
+                setProcessing(false);
+                return;
+            }
+        }
+
         // Prepare data - use custom input if "Lainnya" is selected
         const submitData = {
             ...data,
@@ -93,6 +112,38 @@ export default function JanjiTemu({ staffOptions }) {
     };
 
     const handleChange = (field, value) => {
+        // Validasi jam kerja untuk waktu_janji_temu (08:00 - 15:00, Senin-Jumat)
+        if (field === 'waktu_janji_temu' && value) {
+            const selectedDate = new Date(value);
+            const hours = selectedDate.getHours();
+            const dayOfWeek = selectedDate.getDay(); // 0 = Minggu, 6 = Sabtu
+            
+            let errorMessage = null;
+            
+            // Validasi hari kerja (Senin-Jumat)
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                errorMessage = 'Kunjungan hanya dapat dilakukan pada hari kerja (Senin - Jumat)';
+            }
+            // Jam kerja TIK: 08:00 - 15:00
+            else if (hours < 8 || hours >= 15) {
+                errorMessage = 'Jam kunjungan harus dalam jam kerja TIK (08:00 - 15:00)';
+            }
+            
+            if (errorMessage) {
+                setErrors(prev => ({
+                    ...prev,
+                    waktu_janji_temu: [errorMessage]
+                }));
+            } else {
+                // Hapus error jika waktu valid
+                setErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.waktu_janji_temu;
+                    return newErrors;
+                });
+            }
+        }
+        
         setData(prev => ({ ...prev, [field]: value }));
         
         // Show/hide custom input when "Lainnya" is selected
@@ -229,6 +280,14 @@ export default function JanjiTemu({ staffOptions }) {
                                         onChange={(e) => handleChange('waktu_janji_temu', e.target.value)}
                                         required
                                     />
+                                    <p className="text-xs text-slate-500 mt-1">
+                                        <span className="inline-flex items-center gap-1">
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Jam kerja: Senin - Jumat, 08:00 - 15:00 WIB
+                                        </span>
+                                    </p>
                                     <InputError message={errors.waktu_janji_temu?.[0]} className="mt-2" />
                                 </div>
                             </div>

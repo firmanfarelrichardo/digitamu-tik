@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
+use Carbon\Carbon;
 
 class StoreJanjiTemuRequest extends FormRequest
 {
@@ -29,6 +31,35 @@ class StoreJanjiTemuRequest extends FormRequest
             'waktu_janji_temu' => ['required', 'date', 'after:now'],
             'topik_diskusi' => ['required', 'string'],
         ];
+    }
+
+    /**
+     * Configure the validator instance.
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            if ($this->waktu_janji_temu) {
+                $waktu = Carbon::parse($this->waktu_janji_temu);
+                $jam = $waktu->hour;
+                
+                // Validasi jam kerja TIK: 08:00 - 15:00
+                if ($jam < 8 || $jam >= 15) {
+                    $validator->errors()->add(
+                        'waktu_janji_temu',
+                        'Jam kunjungan harus dalam jam kerja TIK (08:00 - 15:00 WIB).'
+                    );
+                }
+                
+                // Validasi hari kerja (Senin-Jumat)
+                if ($waktu->isWeekend()) {
+                    $validator->errors()->add(
+                        'waktu_janji_temu',
+                        'Kunjungan hanya dapat dilakukan pada hari kerja (Senin - Jumat).'
+                    );
+                }
+            }
+        });
     }
 
     /**
