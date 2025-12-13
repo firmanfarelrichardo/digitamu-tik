@@ -33,7 +33,7 @@ export default function Welcome() {
                         
                         {/* Description */}
                         <p className="text-gray-600 mb-6 text-xs leading-relaxed">
-                            Jadwalkan pertemuan dengan staff atau administrasi UPA TIK secara harus datang mengantri.
+                            Jadwalkan pertemuan dengan staff atau administrasi UPA TIK.
                         </p>
                         
                         {/* Button */}

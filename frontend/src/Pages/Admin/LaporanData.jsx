@@ -504,7 +504,7 @@ export default function LaporanData() {
                                     <button
                                         key={page}
                                         onClick={() => handlePageChange(page)}
-                                        className={`min-w-[36px] h-9 px-3 rounded-lg font-medium text-sm transition-colors ${
+                                        className={`min-w-9 h-9 px-3 rounded-lg font-medium text-sm transition-colors ${
                                             currentPage === page
                                                 ? 'bg-sky-500 text-white'
                                                 : 'text-slate-600 hover:bg-gray-100'

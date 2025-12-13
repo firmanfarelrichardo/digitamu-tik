@@ -72,7 +72,7 @@ export default function StaffLayout({ children }) {
     return (
         <div className="flex min-h-screen bg-[#f8fafc]">
             {/* Sidebar */}
-            <aside className="w-[160px] bg-[#1e293b] text-white flex flex-col fixed h-full">
+            <aside className="w-40 bg-[#1e293b] text-white flex flex-col fixed h-full">
                 {/* Logo/Title */}
                 <div className="px-4 py-4 border-b border-slate-700">
                     <div className="flex items-center gap-2">
@@ -122,7 +122,7 @@ export default function StaffLayout({ children }) {
             </aside>
 
             {/* Main Content Area */}
-            <div className="flex-1 ml-[160px]">
+            <div className="flex-1 ml-40">
                 {/* Top Header */}
                 <header className="bg-white shadow-sm px-6 py-3 flex justify-end items-center sticky top-0 z-10 border-b border-gray-100">
                     {/* User Info */}
