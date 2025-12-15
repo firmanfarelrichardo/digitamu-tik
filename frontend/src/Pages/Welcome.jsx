@@ -90,8 +90,7 @@ export default function Welcome() {
                             Jam Operasional
                         </h3>
                         <div className="text-gray-700 text-xs space-y-1">
-                            <p>Senin - Kamis: 08.00 - 16.00 WIB</p>
-                            <p>Jumat: 08.00 - 16.30 WIB</p>
+                            <p>Senin - Jumat, 08:00 - 15:00 WIB</p>
                             <p className="text-gray-500">Sabtu - Minggu: Tutup</p>
                         </div>
                     </div>
